@@ -10,18 +10,27 @@ module ValueGenerator =
     let randomString = fun () -> "tmp"
     let valueGenerators = dict[int.GetType(), randomInt; ]
 
-    let res<'T> = fun (inputValue:obj) -> if (inputValue :? 'T) then inputValue :?> 'T else Unchecked.defaultof<'T>
-    let castAs<'T> (o:obj) = 
-        match o with
-        | :? 'T as res -> res
-        | _ -> Unchecked.defaultof<'T>
+ //   let res<'T> = fun (inputValue:obj) -> if (inputValue :? 'T) then inputValue :?> 'T else Unchecked.defaultof<'T>
+ //   let castAs<'T> (o:obj) = 
+ //       match o with
+ //       | :? 'T as res -> res
+ //       | _ -> Unchecked.defaultof<'T>
 
    // let randomValue = fun () -> 
   //  let inline genFunc<'T when 'T:> Type> ( ) =
-    let inline genFunc<'T> ( ) =
-      match typeof<'T>  with
-        | int -> castAs<'T>(randomInt() )
-        | _ ->  castAs<'T>(randomString() )
+  //  let castAs<'T> = fun (inputValue:obj) -> if (inputValue :? 'T) then inputValue :?> 'T else Unchecked.defaultof<'T>  
+
+    let cast<'T> (inputValue : obj) = 
+        match inputValue with
+        | :? 'T as typedObject -> typedObject 
+        | _ ->  Unchecked.defaultof<'T>  
+   
+    let inline genFunc<'T> () =
+      match typeof<'T> with
+      | float -> 42.0 |> cast<'T>
+      | int -> randomInt() |> cast<'T>
+      | _ ->  randomString() |> cast<'T>
+
 
 
 
@@ -29,7 +38,7 @@ module ValueGenerator =
 [<EntryPoint>]
 let main argv = 
 
-    Console.WriteLine("random {0}", ValueGenerator.genFunc<string>())
+    Console.WriteLine("random {0}", ValueGenerator.genFunc<float>())
     Console.ReadLine()
 
     0 // return an integer exit code
