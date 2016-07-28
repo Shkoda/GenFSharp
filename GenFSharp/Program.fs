@@ -23,16 +23,20 @@ module ValueGenerator =
 
     let supportedTypes = [|float.GetType(); int.GetType(); string.GetType()|]
     let randomType = fun() -> supportedTypes.[randomGenerator.Next(supportedTypes.Length)]
+    let shortTypeName value = value.GetType().Name
     
     type Option<'T> (value: 'T) =
-        member this.asString = String.Format("Option<{0}>", value)
+        member this.wrap = String.Format("Option<{0}>", value)
+        member this.create = String.Format("Option<{0}>.Create({1})",shortTypeName(value), value)
 
     type Tuple<'A, 'B> (first: 'A, second: 'B) =
-        member this.asString = String.Format("Tuple<{0}, {1}>", first, second)
+        member this.wrap = String.Format("Tuple<{0}, {1}>", first, second)
+        member this.create = String.Format("Tuple<{0}, {1}>.Create({2}, {3})", shortTypeName(first),shortTypeName(second), first, second)
    
 
     type ValueOrError<'A> (value: 'A) =
-        member this.asString = String.Format("ValueOrError<{0}>", value)
+        member this.wrap = String.Format("ValueOrError<{0}>", value)
+        member this.create = String.Format("ValueOrError<{0}>.FromValue({1})", shortTypeName(value), value)
    
     type WrapperEnum = 
         |Option = 0
@@ -44,10 +48,20 @@ module ValueGenerator =
 
     let generify = fun (times : int) ->
            
+        let create = fun() ->
+            let rec create = fun accum ->
+                match randomWrapper() with
+                | WrapperEnum.Option ->(new Option<string>(accum)).create
+                | WrapperEnum.ValueOrError ->(new ValueOrError<string>(accum)).create
+                | WrapperEnum.Tuple ->(new Tuple<string, string>(accum, create(getRandomOfType<string>()))).create
+                | _ -> accum
+            create (getRandomOfType<string>())
+
         let wrap = fun accum ->
             match randomWrapper() with
-             | WrapperEnum.Option ->(new Option<string>(accum)).asString
-             | WrapperEnum.Tuple ->(new Tuple<string, int>(accum, getRandomOfType<int>())).asString
+             | WrapperEnum.Option ->(new Option<string>(accum)).wrap
+             | WrapperEnum.ValueOrError ->(new ValueOrError<string>(accum)).wrap
+             | WrapperEnum.Tuple ->(new Tuple<string, string>(accum, create())).wrap
              | _ -> accum
 
         let rec recWrap accum count = 
@@ -55,7 +69,7 @@ module ValueGenerator =
             | 0 -> accum
             | _ -> recWrap(wrap(accum))(count-1)
 
-        let someValue = getRandomOfType<string>()
+        let someValue = create()
         recWrap someValue times
   
 
@@ -64,7 +78,7 @@ module ValueGenerator =
 
 [<EntryPoint>]
 let main argv = 
-    let text = ValueGenerator.generify(5)
+    let text = ValueGenerator.generify(10)
     Console.WriteLine(text)
     Console.ReadLine()
 
