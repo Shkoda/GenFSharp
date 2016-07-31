@@ -1,15 +1,18 @@
 ﻿open System
+open System.Windows
+open System.Windows.Input
+open System.Windows.Forms
 
 module ValueGenerator = 
+   
     let randomGenerator = new System.Random()
-    let strings = [|"\"entropy\""; "\"thermodynamic system\""; "\"dimension\""|]
-    let randomName = fun (arg: string[]) ->
-        arg.[randomGenerator.Next(strings.Length)]
 
-    let randomString = fun()->randomName(strings)
+    let randomString = fun (arg: string[]) -> arg.[randomGenerator.Next(arg.Length)]
 
-    let randomSomeFunction = fun()->randomName([|"MapToTarget"; "SelectAsSomethingNew"; "CreateFiles"; "OpenHellGate"|])
-    let randomNoneFunction = fun()->randomName([|"GenerateProfit"; "KillYourself"; "ImmolateImproved"; "BuildStairwayToHeaved"|])
+    let randomStartArgument = fun()->randomString([|"\"entropy\""; "\"thermodynamic system\""; "\"dimension\""|])
+    let randomSomeFunction = fun()->randomString([|"MapToTarget"; "SelectAsSomethingNew"; "CreateFiles"; "OpenHellGate"|])
+    let randomNoneFunction = fun()->randomString([|"GenerateProfit"; "KillYourself"; "ImmolateImproved"; "BuildStairwayToHeaved"|])
+    let randomSelectFunction = fun()->randomString([|"GenerateProfit"; "KillYourself"; "ImmolateImproved"; "BuildStairwayToHeaved"|])
 
     let shortTypeName value = value.GetType().Name
        
@@ -88,7 +91,7 @@ module ValueGenerator =
         | _ -> Option(arg), sprintf "Option<%s>" classText, valueText + ".ToOption()"   
 
     let generifyWithTuple arg  classText valueText =
-        let t = randomString()
+        let t = randomStartArgument()
         let (secondArg, secondText) = t,t
         let firstTypeAsString = classText
         let secondTypeAsString = "string"
@@ -101,8 +104,8 @@ module ValueGenerator =
         |ValueOrError = 2
 
     
-   // let randomWrapper = fun () -> enum<WrapperEnum>(randomGenerator.Next(Enum.GetValues(typeof<WrapperEnum>).Length))
-    let randomWrapper = fun () ->  WrapperEnum.Option
+    let randomWrapper = fun () -> enum<WrapperEnum>(randomGenerator.Next(Enum.GetValues(typeof<WrapperEnum>).Length))
+    //let randomWrapper = fun () ->  WrapperEnum.Option
 
     let generify = fun (arg, classText, valueText) ->
         match randomWrapper() with
@@ -117,14 +120,20 @@ module ValueGenerator =
             | 0 -> arg, classText, valueText
             | _ -> recGenerify (generify(arg, classText, valueText) ) (counter - 1)
 
-        let startArg = randomString()
+        let startArg = randomStartArgument()
         recGenerify (startArg,  startArg.GetType().Name, startArg) (times)
 
   
+let form = new Form()
+form.Visible <- true
+form.Text <- "Generify"
 
+[<STAThread>]
+Application.Run(form)
 
 [<EntryPoint>]
 let main argv = 
+     
     let (arg, classText, valueText) = ValueGenerator.generifyTimes(5)
     Console.WriteLine(sprintf "%s result = %s" classText valueText)
 
