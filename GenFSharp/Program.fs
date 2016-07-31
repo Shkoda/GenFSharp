@@ -10,18 +10,17 @@ module ValueGenerator =
     let randomString = fun () -> strings.[randomGenerator.Next(strings.Length)]
 
     let shortTypeName value = value.GetType().Name
-        
+       
     
     type Option<'T> (value: 'T) =
         member this.Val = value
         member this.wrap = String.Format("Option<{0}>", value)
         member this.create = String.Format("Option<{0}>.Create({1})",shortTypeName(value), value)
-    
-    type OptionCreateType = New = 0 |Of = 1
-
-          
+              
 
     type Tuple<'A, 'B> (first: 'A, second: 'B) =
+        member this.First = first
+        member this.Second = second
         member this.wrap = String.Format("Tuple<{0}, {1}>", first, second)
         member this.create = String.Format("Tuple<{0}, {1}>.Create({2}, {3})", shortTypeName(first),shortTypeName(second), first, second)
    
@@ -31,18 +30,25 @@ module ValueGenerator =
         member this.wrap = String.Format("ValueOrError<{0}>", value)
         member this.create = String.Format("ValueOrError<{0}>.FromValue({1})", shortTypeName(value), value)
 
+    let rec ShortTypeName arg =
+        match box arg with
+        | :? ValueOrError<_> as v -> "ValueOrError<"+ShortTypeName(v.Val)+">"
+        | :? Option<_> as o -> String.Format("Option<{0}>", ShortTypeName(o.Val))
+        | :? Tuple<_, _> as t -> String.Format("Tuple<{0}, {1}>", ShortTypeName(t.First), ShortTypeName(t.Second))
+        | _ -> arg.GetType().Name
+
     let rec newOfTypeText arg =
         match box arg with
-        | :? String -> "\"rnd_str\""
-        | :? ValueOrError<_> as v-> newOfTypeText (v.Val)
-        | :? Option<_> as o-> newOfTypeText (o.Val)
-        | _ -> "AAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaAAAAAAAAAAA"
+        | :? String -> "\"rnd_str\"":>Object
+        | :? ValueOrError<_> as v-> ValueOrError( newOfTypeText (v.Val)) :>Object
+        | :? Option<_> as o-> Option(newOfTypeText (o.Val)):>Object
+        | _ -> "AAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaAAAAAAAAAAA":>Object
    
 
     let generifyWithValueOrError arg text =
         match box arg with
         | :? ValueOrError<_> as v ->  v, text+".ContinueWith(MappingFunction)"
-        | _ ->  ValueOrError(arg), String.Format("ValueOrError<{0}>.FromValue({1})", arg.GetType(), arg)  
+        | _ ->  ValueOrError(arg), String.Format("ValueOrError<{0}>.FromValue({1})", ShortTypeName(arg), text)  
     
     let generifyWithOption arg text = 
         match box arg with
@@ -63,14 +69,22 @@ module ValueGenerator =
     
     let randomWrapper = fun () -> enum<WrapperEnum>(randomGenerator.Next(Enum.GetValues(typeof<WrapperEnum>).Length))
 
-    let generifyNew = fun () ->
+    let rec generifyNew = fun times ->
+             
         let generifyInner = fun(arg:Object, text: string) ->
             match randomWrapper() with
             | WrapperEnum.Option -> generifyWithOption arg text |> fun(opt, str)-> opt:>Object,str
             | WrapperEnum.ValueOrError -> generifyWithValueOrError arg text|> fun(voe, str)-> voe:>Object,str
             | _ -> arg, "err "+text
+        
+        let rec recGenerify = fun (arg, text) counter -> 
+            match counter with
+            | 0 -> arg, text
+            | _ -> recGenerify (generifyInner(arg, text)) (counter - 1)
 
-        generifyInner ("\"init_arg\"", "\"init_arg\"")
+        let startArg = "\"init_arg\""
+      //  generifyInner ("\"init_arg\"", "\"init_arg\"")
+        recGenerify (startArg, startArg) (times)
 
 
 
@@ -106,7 +120,7 @@ module ValueGenerator =
 [<EntryPoint>]
 let main argv = 
   //  let text = ValueGenerator.generify(10)
-    let (arg, text) = ValueGenerator.generifyNew()
+    let (arg, text) = ValueGenerator.generifyNew(3)
     Console.WriteLine(text)
     Console.ReadLine()
 
