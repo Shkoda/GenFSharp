@@ -9,10 +9,8 @@ module ValueGenerator =
     let randomStartArgument = fun()->randomString([|"\"entropy\""; "\"thermodynamic system\""; "\"dimension\""|])
     let randomSomeFunction = fun()->randomString([|"MapToTarget"; "SelectAsSomethingNew"; "CreateFiles"; "OpenHellGate"|])
     let randomNoneFunction = fun()->randomString([|"GenerateProfit"; "KillYourself"; "ImmolateImproved"; "BuildStairwayToHeaved"|])
-    let randomSelectFunction = fun()->randomString([|"GenerateProfit"; "KillYourself"; "ImmolateImproved"; "BuildStairwayToHeaved"|])
+    let randomSelectFunction = fun()->randomString([|"TransformIT"; "WaterToVine"; "DustToDust"; "PlumbumToAurum"; "GoldenAge"|])
 
-    let shortTypeName value = value.GetType().Name
-       
     type Option<'T> (some : 'T) =
         member this.some = some
     type Tuple<'A, 'B>(first: 'A, second: 'B) = 
@@ -20,12 +18,11 @@ module ValueGenerator =
         member this.Second = second
     type ValueOrError<'A> (value: 'A) = 
         member this.value = value
+    type Either<'A, 'B> (left: 'A, right: 'B) = 
+        member this.left = left  
+        member this.right = right
 
-    let typeInfo (t:Type) =
-        String.Format("{0} :: IsGenericType={1}, IsGenericTypeDefinition={2}, IsConstructedGenericType={3}, GenericTypeArguments={4}",
-                     t.Name, t.IsGenericType, t.IsGenericTypeDefinition, t.IsConstructedGenericType, t.GenericTypeArguments.Length)
-
-    let rec ShortTypeName = fun ( arg : Object)->     
+    let rec ShortTypeName = fun (arg : Object)->     
         let argType smth =
             match box smth with
             | :? Type as t -> t 
@@ -44,8 +41,6 @@ module ValueGenerator =
 
         let safeArg = argType arg
 
-        Console.WriteLine("\n"+typeInfo(safeArg)+"\n")
-
         if safeArg.IsGenericType
             then genericTypeName safeArg
             else safeArg.Name
@@ -62,7 +57,7 @@ module ValueGenerator =
 
     let generifyWithValueOrError arg classText valueText =
         match box arg with
-        | :? ValueOrError<_> as v ->  v, classText, valueText+"\n\t.ContinueWith(MappingFunction)"
+        | :? ValueOrError<_> as v ->  v, classText, valueText+String.Format("\n\t.ContinueWith({0})", randomSelectFunction())
         | _ ->  
             let currentClass = sprintf "ValueOrError<%s>" classText
             ValueOrError(arg), currentClass, String.Format("{0}\n\t.FromValue({1})", currentClass, valueText)  
@@ -72,31 +67,33 @@ module ValueGenerator =
         | :? Option<_> as o ->
             match randomGenerator.Next(2) with
             | 0 -> o, classText, valueText + String.Format("\n\t.Cata({0}, {1})", randomSomeFunction(), randomNoneFunction())
-            | _ -> o, classText, valueText + "\n\t.Select(SelectionFunc)"
+            | _ -> o, classText, valueText + String.Format("\n\t.Select({0})", randomSelectFunction())
         | _ -> Option(arg), sprintf "Option<%s>" classText, valueText + "\n\t.ToOption()"   
 
-    let generifyWithTuple arg  classText valueText =
+    let generifyWithTuple arg classText valueText =
         let t = randomStartArgument()
         let (secondArg, secondText) = t,t
         let firstTypeAsString = classText
         let secondTypeAsString = "String"
         let currentClass =  sprintf "Tuple<%s, %s>" firstTypeAsString secondTypeAsString 
-        Tuple(arg, secondArg), currentClass, sprintf "%s\n\t.Create(%s, %s)" currentClass valueText secondText       
+        Tuple(arg, secondArg), currentClass, sprintf "%s\n\t.Create(%s, %s)" currentClass valueText secondText 
+        
 
     type WrapperEnum = 
         |Option = 0
         |Tuple = 1
         |ValueOrError = 2
+ //       |Either = 3
 
     
     let randomWrapper = fun () -> enum<WrapperEnum>(randomGenerator.Next(Enum.GetValues(typeof<WrapperEnum>).Length))
-    //let randomWrapper = fun () ->  WrapperEnum.Option
 
     let generify = fun (arg, classText, valueText) ->
         match randomWrapper() with
         | WrapperEnum.Option -> generifyWithOption arg classText valueText  |> fun(opt, classText, valueText) -> opt :> Object, classText, valueText
         | WrapperEnum.ValueOrError -> generifyWithValueOrError arg classText valueText  |> fun(voe, classText, valueText)  -> voe :> Object, classText, valueText
         | WrapperEnum.Tuple -> generifyWithTuple arg classText valueText  |> fun(t, classText, valueText)  -> t :> Object, classText, valueText
+     //   | WrapperEnum.Either -> generifyWithEither arg classText valueText  |> fun(e, classText, valueText)  -> e :> Object, classText, valueText
         | _ -> arg, "dsadad", "dsafa"
 
     let generifyTimes = fun times ->            
