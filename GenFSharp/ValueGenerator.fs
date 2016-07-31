@@ -50,18 +50,6 @@ module ValueGenerator =
             then genericTypeName safeArg
             else safeArg.Name
 
-   
-
- //   let rec ShortTypeName3 arg =
- //       let t = arg.GetType();
-  //      let isTuple =  t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Tuple<_,_>>.GetGenericTypeDefinition()   
-          
-  //      match box arg with
- //       | :? ValueOrError<_> as v -> "ValueOrError<"+ShortTypeName(v.value)+">"
-  //      | :? Option<_> as o -> String.Format("Option<{0}>", ShortTypeName(o.some))
-  //      | :? Tuple<_, _> as t -> String.Format("Tuple<{0}, {1}>", ShortTypeName(t.First), ShortTypeName(t.Second))
-  //      | _ -> "5555555 "+arg.GetType().Name
-
     let rec newOfTypeText arg =
         match box arg with
         | :? String -> "\"rnd_str\"" :> Object
@@ -74,26 +62,26 @@ module ValueGenerator =
 
     let generifyWithValueOrError arg classText valueText =
         match box arg with
-        | :? ValueOrError<_> as v ->  v, classText, valueText+".ContinueWith(MappingFunction)"
+        | :? ValueOrError<_> as v ->  v, classText, valueText+"\n\t.ContinueWith(MappingFunction)"
         | _ ->  
             let currentClass = sprintf "ValueOrError<%s>" classText
-            ValueOrError(arg), currentClass, String.Format("{0}.FromValue({1})", currentClass, valueText)  
+            ValueOrError(arg), currentClass, String.Format("{0}\n\t.FromValue({1})", currentClass, valueText)  
     
     let generifyWithOption arg classText valueText = 
         match box arg with
         | :? Option<_> as o ->
             match randomGenerator.Next(2) with
-            | 0 -> o, classText, valueText + String.Format(".Cata({0}, {1})", randomSomeFunction(), randomNoneFunction())
-            | _ -> o, classText, valueText + ".Select(SelectionFunc)"
-        | _ -> Option(arg), sprintf "Option<%s>" classText, valueText + ".ToOption()"   
+            | 0 -> o, classText, valueText + String.Format("\n\t.Cata({0}, {1})", randomSomeFunction(), randomNoneFunction())
+            | _ -> o, classText, valueText + "\n\t.Select(SelectionFunc)"
+        | _ -> Option(arg), sprintf "Option<%s>" classText, valueText + "\n\t.ToOption()"   
 
     let generifyWithTuple arg  classText valueText =
         let t = randomStartArgument()
         let (secondArg, secondText) = t,t
         let firstTypeAsString = classText
-        let secondTypeAsString = "string"
+        let secondTypeAsString = "String"
         let currentClass =  sprintf "Tuple<%s, %s>" firstTypeAsString secondTypeAsString 
-        Tuple(arg, secondArg), currentClass, sprintf "%s.Create(%s, %s)" currentClass valueText secondText       
+        Tuple(arg, secondArg), currentClass, sprintf "%s\n\t.Create(%s, %s)" currentClass valueText secondText       
 
     type WrapperEnum = 
         |Option = 0

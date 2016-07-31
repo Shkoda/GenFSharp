@@ -5,7 +5,7 @@ open Shkoda.ValueGenerator
 
 module UI =
     let AsMethodText(classText, valueText)  = 
-        sprintf "public %s LibraryMethod()\n{\n\t%s\n}" classText valueText
+        sprintf "public %s LibraryMethod()\n{\n    return\n\t%s\n}" classText valueText
 
     type MainForm() as form = 
         inherit Form()
@@ -16,9 +16,6 @@ module UI =
         let mutable state = Shkoda.ValueGenerator.generifyTimes(1) 
 
         do form.InitializeForm
-
-      //  member val state = Shkoda.ValueGenerator.generifyTimes(1) with get, set
-      
         
         member this.GetCurrentFunctionText = fun () ->
             let (arg, classText, valueText) = state
