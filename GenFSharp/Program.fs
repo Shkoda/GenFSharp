@@ -1,10 +1,7 @@
-﻿open System
-open System.Windows
-open System.Windows.Input
-open System.Windows.Forms
-
+﻿
+namespace Shkoda
+open System
 module ValueGenerator = 
-   
     let randomGenerator = new System.Random()
 
     let randomString = fun (arg: string[]) -> arg.[randomGenerator.Next(arg.Length)]
@@ -124,18 +121,18 @@ module ValueGenerator =
         recGenerify (startArg,  startArg.GetType().Name, startArg) (times)
 
   
-let form = new Form()
+(*let form = new Form()
 form.Visible <- true
 form.Text <- "Generify"
 
 [<STAThread>]
-Application.Run(form)
+Application.Run(form)*)
 
-[<EntryPoint>]
-let main argv = 
+//    [<EntryPoint>]
+ //   let main argv = 
      
-    let (arg, classText, valueText) = ValueGenerator.generifyTimes(5)
-    Console.WriteLine(sprintf "%s result = %s" classText valueText)
+//        let (arg, classText, valueText) = generifyTimes(5)
+ //       Console.WriteLine(sprintf "%s result = %s" classText valueText)
 
 
   //  let t = {ValueGenerator.first="a"; ValueGenerator.second="b";}
@@ -148,8 +145,8 @@ let main argv =
  //   Console.WriteLine(String.Format( "tType = {0} \ntupleType = {1}", gtType, gtupleType))
 
 
-    Console.WriteLine()
+ //       Console.WriteLine()
 
-    Console.ReadLine()
+//        Console.ReadLine()
 
-    0 // return an integer exit code
+        0 // return an integer exit code
