@@ -6,3 +6,11 @@ E:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\FSharp.Core.dll
 E:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\FSharp.Core.xml
 E:\FSharpWorkspace\GenFSharp\GenFSharp\obj\Debug\GenFSharp.exe
 E:\FSharpWorkspace\GenFSharp\GenFSharp\obj\Debug\GenFSharp.pdb
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\GenFSharp.exe.config
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\GenFSharp.XML
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\GenFSharp.exe
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\GenFSharp.pdb
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\FSharp.Core.dll
+G:\FSharpWorkspace\GenFSharp\GenFSharp\bin\Debug\FSharp.Core.xml
+G:\FSharpWorkspace\GenFSharp\GenFSharp\obj\Debug\GenFSharp.exe
+G:\FSharpWorkspace\GenFSharp\GenFSharp\obj\Debug\GenFSharp.pdb

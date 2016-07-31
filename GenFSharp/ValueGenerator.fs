@@ -115,10 +115,11 @@ module ValueGenerator =
         let rec recGenerify = fun (arg, classText, valueText)  counter -> 
             match counter with
             | 0 -> arg, classText, valueText
-            | _ -> recGenerify (generify(arg, classText, valueText) ) (counter - 1)
+            | _ -> recGenerify (generify(arg, classText, valueText)) (counter - 1)
 
         let startArg = randomStartArgument()
-        recGenerify (startArg,  startArg.GetType().Name, startArg) (times)
+        let a = recGenerify(startArg,  startArg.GetType().Name, startArg) (times)
+        a
 
   
 (*let form = new Form()
@@ -128,11 +129,11 @@ form.Text <- "Generify"
 [<STAThread>]
 Application.Run(form)*)
 
-//    [<EntryPoint>]
- //   let main argv = 
-     
-//        let (arg, classText, valueText) = generifyTimes(5)
- //       Console.WriteLine(sprintf "%s result = %s" classText valueText)
+//[<EntryPoint>]
+//let main argv = 
+//    let (arg, classText, valueText) = ValueGenerator.generifyTimes(5)
+//    0
+  //  Console.WriteLine(` "%s result = %s" classText valueText)
 
 
   //  let t = {ValueGenerator.first="a"; ValueGenerator.second="b";}
@@ -149,4 +150,4 @@ Application.Run(form)*)
 
 //        Console.ReadLine()
 
-        0 // return an integer exit code
+//        0 // return an integer exit code
