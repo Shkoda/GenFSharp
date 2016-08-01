@@ -23,6 +23,7 @@ module UI =
 
         member this.InitializeForm =
             this.FormBorderStyle <- FormBorderStyle.Sizable
+            this.BackColor <- Color.White
             this.Text <- "Generify<>"
             this.Width <- 800
             this.Height <- 700
@@ -53,6 +54,7 @@ module UI =
             resetButton.Location <- new Point(600,600)
             resetButton.Width <- 150
             resetButton.Height <- 50
+            resetButton.BackColor <- Color.AntiqueWhite
             resetButton.Click.AddHandler(new System.EventHandler 
                 (fun s e -> this.resetClick(s, e)))
 
