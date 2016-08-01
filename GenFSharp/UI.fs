@@ -2,6 +2,41 @@
 open System.Windows.Forms
 open System.Drawing
 open Shkoda.ValueGenerator
+open System.Runtime.InteropServices
+open System.Text.RegularExpressions
+
+module Lock =
+    [<DllImport(@"User32", CharSet = CharSet.Ansi, SetLastError = false, ExactSpelling = true)>]
+    extern void LockWindowUpdate(int hWnd)
+
+
+type SyntaxRTB() = 
+    inherit System.Windows.Forms.RichTextBox()
+
+    override X.OnTextChanged(e : System.EventArgs) =
+        base.OnTextChanged(e); X.ColorTheKeyWords()
+
+    member X.ColorTheKeyWords() =
+        let HL s c =
+            let color(m : Match, color : Color) =
+                X.SelectionStart    <- m.Index
+                X.SelectionLength   <- m.Length
+                X.SelectionColor    <- color
+            Regex.Matches(X.Text, "\\b" + s + "\\b", RegexOptions.IgnoreCase) |> fun mx ->
+                for m in mx do if (m.Success) then color(m,c)
+
+        let SelectionAt = X.SelectionStart
+        Lock.LockWindowUpdate(X.Handle.ToInt32())
+
+      //  HL "(public)|(return)" Color.LightSeaGreen
+    //    HL "(Tuple)|(Option)|(ValueOrError)|(String)" Color.DarkBlue
+     //   HL "(\"entropy\")|(\"thermodynamic system\")|(\"dimension\")" Color.Green
+
+        X.SelectionStart    <- SelectionAt
+        X.SelectionLength   <- 0
+        X.SelectionColor    <- Color.Black
+
+        Lock.LockWindowUpdate(0)
 
 module UI =
     let AsMethodText(classText, valueText)  = 
@@ -10,7 +45,7 @@ module UI =
     type MainForm() as form = 
         inherit Form()
         let introduction = new Label()
-        let textField = new RichTextBox()
+        let textField = new SyntaxRTB()
         let generifyButton = new Button()
         let resetButton = new Button()
         let mutable state = Shkoda.ValueGenerator.generifyTimes(1) 
@@ -41,6 +76,7 @@ module UI =
             textField.Dock <- DockStyle.None
             textField.AutoSize <- true
             textField.Font <- new Font("Consolas", 10.0f)
+            textField.ColorTheKeyWords()
 
             generifyButton.Text <- "Generify!"
             generifyButton.BackColor <- Color.ForestGreen
@@ -70,10 +106,12 @@ module UI =
         member this.resetClick(sender : System.Object, e : EventArgs) = 
             state <- Shkoda.ValueGenerator.generifyTimes(1)
             textField.Text <- this.GetCurrentFunctionText()
+            textField.ColorTheKeyWords()
 
         member this.generifyClick(sender : System.Object, e : EventArgs) = 
             state <- Shkoda.ValueGenerator.generify(state)
             textField.Text <- this.GetCurrentFunctionText()
+            textField.ColorTheKeyWords()
 
 
 
