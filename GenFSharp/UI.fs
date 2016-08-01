@@ -24,30 +24,35 @@ module UI =
         member this.InitializeForm =
             this.FormBorderStyle <- FormBorderStyle.Sizable
             this.Text <- "Generify<>"
-            this.Width <- 600
-            this.Height <- 300
+            this.Width <- 800
+            this.Height <- 700
 
-            introduction.Text <- "Помоги Илье создать метод для библиотеки"
+            introduction.Text <- "Помоги Илье создать метод для библиотеки =)"
             introduction.Location <- new Point(15,10)
             introduction.Dock <- DockStyle.None
             introduction.AutoSize <- true
+            introduction.Font <- new Font("Courier New", 14.0f)
 
             textField.Text <- this.GetCurrentFunctionText()
-            textField.Location <- new Point(5,35)
-            textField.Width <- 570
-            textField.Height <- 165
+            textField.Location <- new Point(5,40)
+            textField.Width <- 770
+            textField.Height <- 540
             textField.Dock <- DockStyle.None
             textField.AutoSize <- true
+            textField.Font <- new Font("Consolas", 10.0f)
 
             generifyButton.Text <- "Generify!"
-            generifyButton.Location <- new Point(100,220)
-            generifyButton.Width <- 150
+            generifyButton.BackColor <- Color.ForestGreen
+            generifyButton.Location <- new Point(280,600)
+            generifyButton.Width <- 200
+            generifyButton.Height <- 50
             generifyButton.Click.AddHandler(new System.EventHandler 
                 (fun s e -> this.generifyClick(s, e)))
 
             resetButton.Text <- "Reset"
-            resetButton.Location <- new Point(370,220)
+            resetButton.Location <- new Point(600,600)
             resetButton.Width <- 150
+            resetButton.Height <- 50
             resetButton.Click.AddHandler(new System.EventHandler 
                 (fun s e -> this.resetClick(s, e)))
 
